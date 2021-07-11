@@ -19,7 +19,7 @@ type Config struct {
 	sslMode  string
 }
 
-// ConnectDatabase creates the connection with postgres
+// NewDatabase creates the connection with postgres
 func NewDatabase() (*gorm.DB, error) {
 	dbConfig := SetupDatabase()
 	p := dbConfig.port

@@ -7,12 +7,12 @@ import (
 
 // StockRepository Contract
 type StockRepository interface {
-	Create(*model.Share) (error)
-	FindAll() ([]model.Share,error)
+	Create(*model.Share) error
+	FindAll() ([]model.Share, error)
 	FindByID(ID int) (model.Share, error)
 	FindByBvmf(bvmf string) (model.Share, error)
-	Delete(ID int) (error)
-	Update([]model.Share) (error)
+	Delete(ID int) error
+	Update([]model.Share) error
 }
 
 // NewStockRepository repository postgres implementation

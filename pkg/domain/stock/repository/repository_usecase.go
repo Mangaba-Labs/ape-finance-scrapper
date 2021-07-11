@@ -14,7 +14,7 @@ func (r *Repository) Create(share *model.Share) (err error) {
 	result := r.DB.Create(&share)
 	err = result.Error
 	return
-} 
+}
 
 // Delete share from database
 func (r *Repository) Delete(ID int) (err error) {

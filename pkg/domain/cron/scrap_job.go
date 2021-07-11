@@ -7,7 +7,7 @@ import (
 	"github.com/robfig/cron"
 )
 
-
+// InitCron start our cronjob
 func InitCron() {
 	// Starting cron job
 	c := cron.New()

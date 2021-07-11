@@ -8,8 +8,8 @@ import (
 
 // StockService contract
 type StockService interface {
-	Create(bvmf string)  models.Response
-	Delete(ID int) (models.Response)
+	Create(bvmf string) models.Response
+	Delete(ID int) models.Response
 	GetAll() ([]model.Share, models.Response)
 	GetByID(ID int) (model.Share, models.Response)
 }
@@ -21,6 +21,3 @@ func NewUserService(repository stockRepository.Repository) (service StockService
 	}
 	return
 }
-
-
-

@@ -13,8 +13,8 @@ import (
 )
 
 // Scrapper struct implementation
-// GetStocks Scrapper to get all stocks in database
-func UpdateShares() (error) {
+// UpdateShares function called in our cron job
+func UpdateShares() error {
 	db, err := database.NewDatabase()
 	if err != nil {
 		return err
