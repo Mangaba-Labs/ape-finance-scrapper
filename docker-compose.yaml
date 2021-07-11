@@ -1,0 +1,20 @@
+version: "3"
+services:
+  scrapper:
+    container_name: ape-finance-scrapper
+    image: artsantana/ape-finance-scrapper
+    build: .
+    ports:
+      - 8080:8080
+    restart: on-failure
+    volumes:
+      - scrapper:/usr/src/app
+    depends_on:
+      - db-ape-finance
+    networks:
+      - ape
+    env_file:
+      - .env
+
+volumes:
+  scrapper:
