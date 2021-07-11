@@ -10,6 +10,7 @@ type StockRepository interface {
 	Create(*model.Share) (error)
 	FindAll() ([]model.Share,error)
 	FindByID(ID int) (model.Share, error)
+	FindByBvmf(bvmf string) (model.Share, error)
 	Delete(ID int) (error)
 }
 
