@@ -1,17 +1,20 @@
 package cron
 
 import (
+	"log"
+
+	"github.com/Mangaba-Labs/ape-finance-scrapper/pkg/domain/scrapper"
 	"github.com/robfig/cron"
 )
 
 
-func TestCronJob() {
-	// fmt.Println("Running TestCronJob")
-}
-
 func InitCron() {
 	// Starting cron job
 	c := cron.New()
-	c.AddFunc("@every 10s", func() {TestCronJob()})
+	c.AddFunc("@every 5m", func() {
+		if err := scrapper.UpdateShares(); err != nil {
+			log.Fatalln(err)
+		}
+	})
 	c.Start()
 }

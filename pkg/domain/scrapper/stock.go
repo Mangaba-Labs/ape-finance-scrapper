@@ -6,19 +6,25 @@ import (
 	"strconv"
 	"sync"
 
+	"github.com/Mangaba-Labs/ape-finance-scrapper/database"
 	"github.com/Mangaba-Labs/ape-finance-scrapper/pkg/domain/stock/model"
-	"github.com/Mangaba-Labs/ape-finance-scrapper/pkg/domain/stock/repository"
+	stockRepository "github.com/Mangaba-Labs/ape-finance-scrapper/pkg/domain/stock/repository"
 	"github.com/mxschmitt/playwright-go"
 )
 
 // Scrapper struct implementation
-type Scrapper struct {
-	Repository repository.Repository
-}
-
 // GetStocks Scrapper to get all stocks in database
-func (s Scrapper) UpdateShares() (error) {
-	stockModels, err := s.Repository.FindAll()
+func UpdateShares() (error) {
+	db, err := database.NewDatabase()
+	if err != nil {
+		return err
+	}
+	repositoryStock := stockRepository.Repository{
+		DB: db,
+	}
+
+	stocks, err := repositoryStock.FindAll()
+	fmt.Println(stocks)
 	if err != nil {
 		return err
 	}
@@ -31,21 +37,24 @@ func (s Scrapper) UpdateShares() (error) {
 		return err
 	}
 
-	responseSlice := []model.Share{}
+	stocksUpdated := []model.Share{}
 
 	var wg sync.WaitGroup
-	for i := 0; i < len(stockModels); i++ {
+	for i := 0; i < len(stocks); i++ {
 		wg.Add(1)
-		go worker(&wg, browser, stockModels[i], &responseSlice)
+		go worker(&wg, browser, stocks[i], &stocksUpdated)
 	}
 	wg.Wait()
 	if err = pw.Stop(); err != nil {
 		log.Fatalf("could not stop Playwright: %v\n", err)
 		return err
 	}
-	return nil
+
+	err = repositoryStock.Update(stocksUpdated)
+	return err
 }
 
+// ScrapFullStock to create stock in database
 func ScrapFullStock(bvmf string) (share model.Share, err error) {
 	pw, err := playwright.Run()
 	if err != nil {
@@ -118,7 +127,7 @@ func ScrapFullStock(bvmf string) (share model.Share, err error) {
 	}
 	price, _ := strconv.ParseFloat(value, 2)
 
-	browser.Close()
+	pw.Stop()
 
 	share.Bvmf = bvmf
 	share.Company = company
@@ -158,6 +167,10 @@ func scrapStock(browser playwright.Browser, bvmf string) (scrapped model.Variabl
 		return
 	}
 	value, err := valueEntry[0].InnerText()
+	if err != nil {
+		log.Fatalln(err)
+		return
+	}
 	price, _ := strconv.ParseFloat(value, 2)
 
 	scrapped.Price = float32(price)
@@ -166,27 +179,12 @@ func scrapStock(browser playwright.Browser, bvmf string) (scrapped model.Variabl
 	return scrapped, nil
 }
 
-// Async method to get scrapped data and parse to stockResponse
-func workerUpdate(wg *sync.WaitGroup, browser playwright.Browser, stock model.Share, stockResponse *[]model.Share) {
-	defer wg.Done()
-
-	scrapped, _ := scrapStock(browser, stock.Bvmf)
-
-	var response model.Share
-
-	response.Price = scrapped.Price
-	response.Variation = scrapped.Variation
-
-	*stockResponse = append(*stockResponse, response)
-}
-
 func worker(wg *sync.WaitGroup, browser playwright.Browser, stock model.Share, stockResponse *[]model.Share) {
 	defer wg.Done()
 
 	scrapped, _ := scrapStock(browser, stock.Bvmf)
 
-	var response model.Share
-
+	response := stock
 	response.Price = scrapped.Price
 	response.Variation = scrapped.Variation
 
