@@ -12,17 +12,20 @@ type Handler struct {
 	service service.StockService
 }
 
+// AddStock handles insert stock
 func (h *Handler) AddStock(c *fiber.Ctx) error {
 	bvmf := c.Params("bvmf")
 	res := h.service.Create(bvmf)
 	return c.Status(res.HttpCode).JSON(fiber.Map{"status": res.Status, "message": res.Message})
 }
 
+// GetAllStocks handles select stock
 func (h *Handler) GetAllStocks(c *fiber.Ctx) error {
 	stocks, res := h.service.GetAll()
 	return c.Status(res.HttpCode).JSON(fiber.Map{"status": res.Status, "message": res.Message, "result": stocks})
 }
 
+// GetStockByID handles select by ID stock
 func (h *Handler) GetStockByID(c *fiber.Ctx) error {
 	idParam := c.Params("id")
 	id, err := strconv.Atoi(idParam)
@@ -33,6 +36,7 @@ func (h *Handler) GetStockByID(c *fiber.Ctx) error {
 	return c.Status(res.HttpCode).JSON(fiber.Map{"status": res.Status, "message": res.Message, "result": stock})
 }
 
+// DeleteStock handles delete stock
 func (h *Handler) DeleteStock(c *fiber.Ctx) error {
 	idParam := c.Params("id")
 	id, err := strconv.Atoi(idParam)

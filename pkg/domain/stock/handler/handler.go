@@ -5,6 +5,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
+// StockHandler contract
 type StockHandler interface {
 	AddStock(c *fiber.Ctx) error
 	GetAllStock(c *fiber.Ctx) error
