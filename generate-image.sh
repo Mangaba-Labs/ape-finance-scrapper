@@ -1,1 +1,1 @@
-docker build .
+docker build -t artsantana/ape-finance-scrapper .
