@@ -1,7 +1,6 @@
 package scrapper
 
 import (
-	"errors"
 	"fmt"
 	"log"
 	"strconv"
@@ -47,77 +46,49 @@ func (s Scrapper) UpdateShares() (error) {
 	return nil
 }
 
-// CheckIfExists check if stock exists before register in database
-func (s Scrapper) CheckIfExists(bvmf string) (stock *model.Share, err error) {
-	// Opening browser
+func ScrapFullStock(bvmf string) (share model.Share, err error) {
 	pw, err := playwright.Run()
 	if err != nil {
-		return
+		return share, err
 	}
+
 	browser, err := pw.Chromium.Launch()
 	if err != nil {
-		return
+		return share, err
 	}
-	page, err := browser.NewPage()
 
+	page, err := browser.NewPage()
 	if err != nil {
 		log.Fatalf("could not create page: %v\n", err)
 		return
 	}
 
 	searchPage := fmt.Sprintf("https://www.tradingview.com/symbols/BMFBOVESPA-%s/", bvmf)
-
 	if _, err = page.Goto(searchPage); err != nil {
 		log.Fatalf("could not goto: %v", err)
 	}
 
-	// Finding company name
 	companyEntry, err := page.QuerySelectorAll("div.tv-symbol-header__first-line")
-
+	if err != nil {
+		log.Fatalln(err)
+		return
+	}
+	company, err := companyEntry[0].InnerText()
 	if err != nil {
 		log.Fatalln(err)
 		return
 	}
 
-	if len(companyEntry) == 0 {
-		return stock, errors.New("Company not founded")
-	}
-
-	stock.Company, _ = companyEntry[0].InnerText()
-
-	// Closing browser
-	if err = browser.Close(); err != nil {
-		log.Fatalf("could not close browser: %v\n", err)
-		return
-	}
-	if err = pw.Stop(); err != nil {
-		log.Fatalf("could not stop Playwright: %v\n", err)
-		return
-	}
-	return stock, nil
-}
-
-func scrapStock(browser playwright.Browser, bvmf string) (scrapped model.VariableData, err error) {
-	page, err := browser.NewPage()
+	imageEntry, err := page.QuerySelectorAll("img.tv-circle-logo.tv-circle-logo--large.tv-category-header__icon")
 	if err != nil {
-		log.Fatalf("could not create page: %v\n", err)
+		log.Fatalln(err)
 		return
 	}
-
-	searchPage := fmt.Sprintf("https://www.tradingview.com/symbols/BMFBOVESPA-%s/", bvmf)
-	if _, err = page.Goto(searchPage); err != nil {
-		log.Fatalf("could not goto: %v", err)
+	image, err := imageEntry[0].GetAttribute("src")
+	if err != nil {
+		log.Fatalln(err)
+		return
 	}
-	// imageEntry, err := page.QuerySelectorAll("img.tv-circle-logo.tv-circle-logo--large.tv-category-header__icon")
-	// if err != nil {
-	// 	log.Fatalln(err)
-	// 	return
-	// }
-	// image, err := imageEntry[0].GetAttribute("src")
-	// if err != nil {
-	// 	log.Fatalln(err)
-	// 	return
-	// }
 
 	if err != nil {
 		log.Fatalln(err)
@@ -141,10 +112,57 @@ func scrapStock(browser playwright.Browser, bvmf string) (scrapped model.Variabl
 		return
 	}
 	value, err := valueEntry[0].InnerText()
+	if err != nil {
+		log.Fatalln(err)
+		return
+	}
+	price, _ := strconv.ParseFloat(value, 2)
+
+	browser.Close()
+
+	share.Bvmf = bvmf
+	share.Company = company
+	share.Price = float32(price)
+	share.Variation = variation
+	share.Image = image
+	return share, nil
+}
+
+func scrapStock(browser playwright.Browser, bvmf string) (scrapped model.VariableData, err error) {
+	page, err := browser.NewPage()
+	if err != nil {
+		log.Fatalf("could not create page: %v\n", err)
+		return
+	}
+
+	searchPage := fmt.Sprintf("https://www.tradingview.com/symbols/BMFBOVESPA-%s/", bvmf)
+	if _, err = page.Goto(searchPage); err != nil {
+		log.Fatalf("could not goto: %v", err)
+	}
+
+	// Variation
+	variationValuesEntry, err := page.QuerySelectorAll("div.js-symbol-change-direction.tv-symbol-price-quote__change")
+	if err != nil {
+		log.Fatalln(err)
+		return
+	}
+	variation, err := variationValuesEntry[0].InnerText()
+	if err != nil {
+		log.Fatalln(err)
+		return
+	}
+	// Stock Value
+	valueEntry, err := page.QuerySelectorAll("div.tv-symbol-price-quote__value.js-symbol-last")
+	if err != nil {
+		log.Fatalf("could not get entries: %v\n", err)
+		return
+	}
+	value, err := valueEntry[0].InnerText()
 	price, _ := strconv.ParseFloat(value, 2)
 
 	scrapped.Price = float32(price)
 	scrapped.Variation = variation
+
 	return scrapped, nil
 }
 

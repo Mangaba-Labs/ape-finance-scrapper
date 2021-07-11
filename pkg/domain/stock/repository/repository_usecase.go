@@ -36,3 +36,10 @@ func (r *Repository) FindByID(ID int) (share model.Share, err error) {
 	err = result.Error
 	return
 }
+
+// FindByBvmf shares in database
+func (r *Repository) FindByBvmf(bvmf string) (share model.Share, err error) {
+	result := r.DB.First(&share, "bvmf = ?", bvmf)
+	err = result.Error
+	return
+}
