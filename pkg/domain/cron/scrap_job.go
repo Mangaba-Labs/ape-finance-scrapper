@@ -11,7 +11,7 @@ import (
 func InitCron() {
 	// Starting cron job
 	c := cron.New()
-	c.AddFunc("@every 5m", func() {
+	c.AddFunc("@every 20m", func() {
 		if err := scrapper.UpdateShares(); err != nil {
 			log.Fatalln(err)
 		}
