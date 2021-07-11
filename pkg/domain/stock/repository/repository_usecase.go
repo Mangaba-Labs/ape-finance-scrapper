@@ -43,3 +43,9 @@ func (r *Repository) FindByBvmf(bvmf string) (share model.Share, err error) {
 	err = result.Error
 	return
 }
+
+func (r *Repository) Update(shares []model.Share) (err error) {
+	result := r.DB.Save(shares)
+	err = result.Error
+	return
+}

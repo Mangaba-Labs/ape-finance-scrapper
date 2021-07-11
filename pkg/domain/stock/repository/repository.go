@@ -12,6 +12,7 @@ type StockRepository interface {
 	FindByID(ID int) (model.Share, error)
 	FindByBvmf(bvmf string) (model.Share, error)
 	Delete(ID int) (error)
+	Update([]model.Share) (error)
 }
 
 // NewStockRepository repository postgres implementation
