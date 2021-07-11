@@ -29,7 +29,7 @@ func (s *Service) Create(bvmf string) (response models.Response) {
 		response.Set(500, "Error", "Cannot create stock!")
 		return response
 	}
-	response.Set(201, "Success","Created!")
+	response.Set(201, "Success", "Created!")
 	return response
 }
 
@@ -48,7 +48,7 @@ func (s *Service) GetAll() (stocks []model.Share, response models.Response) {
 	stocks, err := s.Repository.FindAll()
 
 	if err != nil {
-		response.Set(500, "Error","Cannot get stocks!")
+		response.Set(500, "Error", "Cannot get stocks!")
 		return nil, response
 	}
 	response.Set(200, "Success", "Ok")

@@ -17,8 +17,6 @@ import (
 	"github.com/gofiber/helmet/v2"
 )
 
-
-
 func main() {
 	// Setting up environment variables
 	config.SetupEnvVars()
@@ -71,6 +69,6 @@ func main() {
 
 	// Starting cron job
 	cron.InitCron()
-	
+
 	log.Fatal(app.Listen(port))
 }

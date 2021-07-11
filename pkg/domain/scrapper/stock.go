@@ -14,7 +14,7 @@ import (
 
 // Scrapper struct implementation
 // GetStocks Scrapper to get all stocks in database
-func UpdateShares() (error) {
+func UpdateShares() error {
 	db, err := database.NewDatabase()
 	if err != nil {
 		return err
